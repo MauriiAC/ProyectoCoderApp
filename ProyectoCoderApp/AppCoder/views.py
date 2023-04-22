@@ -10,6 +10,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -38,7 +39,9 @@ def inicio(request):
     
 def cursos(self):
     
-    return render(self, "cursos.html")
+    lista = Curso.objects.all()
+    
+    return render(self, "cursos.html", {"lista_cursos": lista})
 
 def profesores(self):
     
@@ -112,12 +115,31 @@ def crea_profesor(request):
     print('post: ', request.POST)
 
     if request.method == 'POST':
-      miFormulario = ProfesorFormulario(request.POST)
 
-      if miFormulario.is_valid():
+      info = request.POST
+
+      miFormulario1 = ProfesorFormulario({
+         "nombre": info["nombre"],
+         "apellido": info["apellido"],
+         "email": info["email"],
+         "profesion": info["profesion"]
+      })
+      miFormulario2 = UserCreationForm({
+         "username": info["username"],
+         "password1": info["password1"],
+         "password2": info["password2"]
+      })
+
+      if miFormulario1.is_valid() and miFormulario2.is_valid():
           
-          data = miFormulario.cleaned_data
-          profesor = Profesor(nombre=data['nombre'], apellido=data['apellido'], email=data['email'],profesion=data['profesion'])
+          data = miFormulario1.cleaned_data
+          data2 = miFormulario2.cleaned_data
+
+          user = User(username=data2["username"])
+          user.set_password(data2["password1"])
+          user.save()
+
+          profesor = Profesor(nombre=data['nombre'], apellido=data['apellido'], email=data['email'],profesion=data['profesion'], user_id=user)
           profesor.save()
           
           return HttpResponseRedirect('/app-coder/')
@@ -126,7 +148,8 @@ def crea_profesor(request):
           return render(request, "inicio.html", {"mensaje": "Formulario invalido"})
     else:
       miFormulario = ProfesorFormulario()
-      return render(request, "profesorFormulario.html", {"miFormulario": miFormulario})
+      userForm = UserCreationForm()
+      return render(request, "profesorFormulario.html", {"miFormulario": miFormulario, "userForm": userForm})
 
 
 def eliminarProfesor(request, id):

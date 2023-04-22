@@ -9,12 +9,20 @@ class Curso(models.Model):
 
   def __str__(self):
     return f'{self.nombre}'
+  
+  class Meta:
+
+    verbose_name = 'Course'
+    verbose_name_plural = 'The Courses'
+    ordering = ('-nombre',)
+    unique_together = ['nombre', 'camada']
 
 class Estudiante(models.Model):
 
   nombre = models.CharField(max_length=50)
   apellido = models.CharField(max_length=50)
   email = models.EmailField(max_length=254)
+  user_id = models.OneToOneField(User, on_delete=models.CASCADE)
 
   def __str__(self):
     return f'{self.nombre}'  
@@ -25,10 +33,11 @@ class Profesor(models.Model):
   apellido = models.CharField(max_length=50)
   email = models.EmailField(max_length=254)
   profesion = models.CharField(max_length=50)
+  user_id = models.OneToOneField(User, on_delete=models.CASCADE)
   cursos = models.ManyToManyField(Curso)
 
   def __str__(self):
-    return f'{self.nombre} {self.apellido}'  
+    return f'{self.nombre} {self.apellido}'
 
 class Entregable(models.Model):
 

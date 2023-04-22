@@ -7,6 +7,7 @@
   <form action="{% url 'CreaProfesor' %}" method="POST">{% csrf_token %}
 
     {{miFormulario.as_p}}
+    {{userForm.as_p}}
 
     <button type="submit"> Enviar </button>
 
